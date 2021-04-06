@@ -1,0 +1,14 @@
+{
+    "wallet":{
+        "host":"127.0.0.1",
+        "user":"RPC-USERNAME",
+        "password":"RPC-PASSWORD",
+        "port":45443,
+        "txfee":0.002
+    },
+    "discord":{
+        "botToken":"DISCORD-BOT-TOKEN",
+	    "botChannelIds": ["DISCORD-BOT-CHANNEL1", "DISCORD-BOT-CHANNEL2"]
+    },
+    "commandPrefix": "/"
+}
