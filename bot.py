@@ -25,7 +25,8 @@ for botChannel in botChannels:
 
 tipbotChannelMsg = 'Please use ' + botChannelsStr + 'channels for tipbot commands.'
 helpmsg = """**/help** or **/commands** - display this message\n
-**/price** - get current price of Reddcoin from CoinGecko\n
+**/stats** - get ReddTipbot and ReddCoin network statistics\n
+**/price** - get current price of ReddCoin from CoinGecko\n
 **/deposit** or **/addr** - get address for your deposits and receive tip from rain\n
 **/balance** - get your balance\n
 **/balance unconf** - get your balance including unconfirmed balance\n
@@ -86,7 +87,7 @@ async def on_message(message):
             return await message.reply(tipbotChannelMsg)
 
     # respond with deposit address
-    if message.content.startswith(prefix + 'deposit') or message.content.startswith('!addr'):
+    if message.content.startswith(prefix + 'deposit') or message.content.startswith(prefix + 'addr'):
         if str(message.channel.id) in botChannels or message.channel.type is discord.ChannelType.private:
             account = str(message.author.id)
             address = getAddress(account)
@@ -112,10 +113,11 @@ async def on_message(message):
     if message.content.startswith(prefix + 'balance unconf'): # 0 conf. balance
         if str(message.channel.id) in botChannels or message.channel.type is discord.ChannelType.private:
             account = str(message.author.id)
-            balance = str(getBalance(account,0))
+            balance = getBalance(account,0)
+            strBalance = str(balance if balance > 0 else 0)
             embed = discord.Embed(title='**:bank::money_with_wings::moneybag: Your Balance :moneybag::money_with_wings::bank:**', color=0xE31B23) #,color=Hex code
             embed.add_field(name='__User__', value='<@' + account + '>', inline=False)
-            embed.add_field(name='__Balance (incl. 0 conf.)__', value='**' + str(balance) + ' RDD**', inline=False)
+            embed.add_field(name='__Balance (incl. 0 conf.)__', value='**' + strBalance + ' RDD**', inline=False)
             return await message.reply(embed=embed) # reply in channel
         else:
             return await message.reply(tipbotChannelMsg)
@@ -124,10 +126,11 @@ async def on_message(message):
     if message.content.startswith(prefix + 'balance'):
         if str(message.channel.id) in botChannels or message.channel.type is discord.ChannelType.private:
             account = str(message.author.id)
-            balance = str(getBalance(account))
+            balance = getBalance(account)
+            strBalance = str(balance if balance > 0 else 0)
             embed = discord.Embed(title='**:bank::money_with_wings::moneybag: Your Balance :moneybag::money_with_wings::bank:**', color=0xE31B23) #,color=Hex code
             embed.add_field(name='__User__', value='<@' + account + '>', inline=False)
-            embed.add_field(name='__Balance__', value='**' + str(balance) + ' RDD**', inline=False)
+            embed.add_field(name='__Balance__', value='**' + strBalance + ' RDD**', inline=False)
             return await message.reply(embed=embed)
         else:
             return await message.reply(tipbotChannelMsg)
