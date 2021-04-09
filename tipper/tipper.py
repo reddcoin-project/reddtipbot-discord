@@ -24,9 +24,13 @@ def validateAddress(address):
     validate = con.validateaddress(address)
     return validate['isvalid']
 
+# get new address for new user
+def getNewAddress(account):
+    return con.getnewaddress(account)
+
 # get user account's address
 def getAddress(account):
-    return con.getaccountaddress(account)
+    return con.getaddressesbyaccount(account)[0]
 
 # get account's balance
 def getBalance(account,minconf=6):

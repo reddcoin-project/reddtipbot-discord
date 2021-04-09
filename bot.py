@@ -25,14 +25,15 @@ for botChannel in botChannels:
 
 tipbotChannelMsg = 'Please use ' + botChannelsStr + 'channels for tipbot commands.'
 helpmsg = """**/help** or **/commands** - display this message\n
+**/register** - register to receive tip from rain\n
 **/stats** - get ReddTipbot and ReddCoin network statistics\n
 **/price** - get current price of ReddCoin from CoinGecko\n
-**/deposit** or **/addr** - get address for your deposits and receive tip from rain\n
+**/deposit** or **/addr** - get address for your deposits\n
 **/balance** - get your balance\n
 **/balance unconf** - get your balance including unconfirmed balance\n
 **/tip <@user> <amount>** - mention a user with @ and then the amount to tip them\n
 **/withdraw <amount> <address>** - withdraw coins to specified address\n
-**/rain <amount>** - tip all registered users (/deposit to register)\n
+**/rain <amount>** - tip all registered users\n
 **/crowdfund <amount>** - help us get listed on more exchanges\n
 **/donate <amount>** - donate to support charities"""
 
@@ -67,7 +68,7 @@ async def on_message(message):
         if str(message.channel.id) in botChannels or message.channel.type is discord.ChannelType.private:            
             embed = discord.Embed(title='**<:redd:757904864255672400>:robot: Reddcoin Tipbot :robot:<:redd:757904864255672400>**', color=0xE31B23) #,color=Hex code
             embed.add_field(name='__Commands__', value=helpmsg, inline=False)
-            embed.add_field(name='__Withdrawal Fee__', value='**' + str(txfee) + ' RDD**', inline=False)
+            embed.add_field(name='__Withdrawal Fee__', value='**' + str(txfee) + ' RDD**', inline=False)            
             return await message.channel.send(embed=embed)
         else:
             return await message.reply(tipbotChannelMsg)
@@ -86,26 +87,41 @@ async def on_message(message):
         else:
             return await message.reply(tipbotChannelMsg)
 
-    # respond with deposit address
-    if message.content.startswith(prefix + 'deposit') or message.content.startswith(prefix + 'addr'):
+    # process deposit/addr/register command
+    if message.content.startswith(prefix + 'deposit') or message.content.startswith(prefix + 'addr') or message.content.startswith(prefix + 'register'):
         if str(message.channel.id) in botChannels or message.channel.type is discord.ChannelType.private:
             account = str(message.author.id)
-            address = getAddress(account)
+            accounts = getUsers()
+            address = ''
+            registerTitle = ''
             
-            # generate qr code from deposit address
-            qr = qrcode.make(address)
-            # temporarily save address in memory
-            arr = io.BytesIO()
-            qr.save(arr, format='PNG')
-            arr.seek(0)
+            # get new address only if an account does not exit in the wallet
+            if account in accounts:
+                address = getAddress(account)
+                registerTitle = '**:card_index::white_check_mark: You have already been registered! :white_check_mark::card_index:**'
+            else:
+                address = getNewAddress(account)
+                registerTitle = '**:card_index::white_check_mark: Registered! :white_check_mark::card_index:**'
 
-            file = discord.File(arr, filename='deposit-qr.png')
-            embed = discord.Embed(title='**:bank::card_index::moneybag: Your Deposit Address :moneybag::card_index::bank:**', color=0xE31B23) #,color=Hex code
-            embed.add_field(name='__User__', value='<@' + account + '>', inline=False)
-            embed.add_field(name='__Address__', value='**' + address + '**', inline=False)
-            embed.set_image(url="attachment://deposit-qr.png")
-            # return await message.author.send(embed=embed) # reply with private message
-            return await message.reply(file=file, embed=embed) # reply in channel
+            if message.content.startswith(prefix + 'register'):
+                embed = discord.Embed(title=registerTitle, color=0xE31B23) #,color=Hex code
+                embed.add_field(name='__User__', value='<@' + account + '>', inline=False)
+                return await message.reply(embed=embed)
+            else:
+                # generate qr code from deposit address
+                qr = qrcode.make(address)
+                # temporarily save qr in memory
+                arr = io.BytesIO()
+                qr.save(arr, format='PNG')
+                arr.seek(0)
+
+                file = discord.File(arr, filename='deposit-qr.png')
+                embed = discord.Embed(title='**:bank::card_index::moneybag: Your Deposit Address :moneybag::card_index::bank:**', color=0xE31B23) #,color=Hex code
+                embed.add_field(name='__User__', value='<@' + account + '>', inline=False)
+                embed.add_field(name='__Address__', value='**' + address + '**', inline=False)
+                embed.set_image(url="attachment://deposit-qr.png")
+                # return await message.author.send(embed=embed) # reply with private message
+                return await message.reply(file=file, embed=embed) # reply in channel
         else:
             return await message.reply(tipbotChannelMsg)
 
@@ -221,6 +237,7 @@ async def on_message(message):
                 embed.add_field(name='__Amount__', value='**' + str(eachtip) + ' RDD**', inline=False)
                 embed.add_field(name='__Sender__', value='**<@' + account + '>**', inline=False)
                 embed.add_field(name='__Receivers__', value='**' + tippedUsers + '**', inline=False)
+                embed.set_footer(text="**Please register (**/register** command) if you would like to receive tip from rain.")
                 return await message.channel.send(embed=embed)                
             except ValueError:
                 return await message.reply("{0.author.mention}, insufficient balance.".format(message))
