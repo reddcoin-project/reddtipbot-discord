@@ -68,7 +68,7 @@ async def on_message(message):
         if str(message.channel.id) in botChannels or message.channel.type is discord.ChannelType.private:            
             embed = discord.Embed(title='**<:redd:757904864255672400>:robot: Reddcoin Tipbot :robot:<:redd:757904864255672400>**', color=0xE31B23) #,color=Hex code
             embed.add_field(name='__Commands__', value=helpmsg, inline=False)
-            embed.add_field(name='__Withdrawal Fee__', value='**' + str(txfee) + ' RDD**', inline=False)            
+            embed.add_field(name='__Withdrawal Fee__', value='**' + str(txfee) + ' RDD/kB**', inline=False)            
             return await message.channel.send(embed=embed)
         else:
             return await message.reply(tipbotChannelMsg)
@@ -236,8 +236,8 @@ async def on_message(message):
                 embed = discord.Embed(title=':cloud_rain::money_with_wings: Tipbot Rain :money_with_wings::cloud_rain:', color=0xE31B23) #,color=Hex code
                 embed.add_field(name='__Amount__', value='**' + str(eachtip) + ' RDD**', inline=False)
                 embed.add_field(name='__Sender__', value='**<@' + account + '>**', inline=False)
-                embed.add_field(name='__Receivers__', value='**' + tippedUsers + '**', inline=False)
-                embed.set_footer(text="**Please register (**/register** command) if you would like to receive tip from rain.")
+                embed.add_field(name='__Receivers__', value='**' + tippedUsers[0:400] + '...**', inline=False)
+                embed.set_footer(text="**Please register (/register) if you would like to receive tip from rain.")
                 return await message.channel.send(embed=embed)                
             except ValueError:
                 return await message.reply("{0.author.mention}, insufficient balance.".format(message))
